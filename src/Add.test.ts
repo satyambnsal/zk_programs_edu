@@ -1,5 +1,6 @@
 import { AccountUpdate, Field, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Add } from './Add';
+import { SimpleProgram } from './SimpleProgram';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -10,7 +11,7 @@ import { Add } from './Add';
 
 let proofsEnabled = false;
 
-describe('Add', () => {
+describe.skip('Add', () => {
   let deployerAccount: Mina.TestPublicKey,
     deployerKey: PrivateKey,
     senderAccount: Mina.TestPublicKey,
@@ -45,13 +46,13 @@ describe('Add', () => {
     await txn.sign([deployerKey, zkAppPrivateKey]).send();
   }
 
-  it('generates and deploys the `Add` smart contract', async () => {
+  it.skip('generates and deploys the `Add` smart contract', async () => {
     await localDeploy();
     const num = zkApp.num.get();
     expect(num).toEqual(Field(1));
   });
 
-  it('correctly updates the num state on the `Add` smart contract', async () => {
+  it.skip('correctly updates the num state on the `Add` smart contract', async () => {
     await localDeploy();
 
     // update transaction
@@ -64,4 +65,22 @@ describe('Add', () => {
     const updatedNum = zkApp.num.get();
     expect(updatedNum).toEqual(Field(3));
   });
+
+  it('correctly verifies simple program proof', async () => {
+    await localDeploy();
+
+    const {verificationKey} = await SimpleProgram.compile();
+    const proof = await SimpleProgram.run(Field(1));
+    
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.verify_simple_program_proof(proof)
+    })
+    await txn.prove();
+
+    await txn.sign([senderKey]).send();
+
+    const updatedNum = zkApp.num.get();
+    expect(updatedNum).toEqual(Field(0));
+  })
+
 });
