@@ -1,5 +1,5 @@
 import { Field, SmartContract, state, State, method} from 'o1js';
-import { SimpleProgram } from './SimpleProgram';
+import { SimpleProgram, SimpleProgramProof } from './SimpleProgram';
 
 /**
  * Basic Example
@@ -24,9 +24,10 @@ export class Add extends SmartContract {
     this.num.set(newState);
   }
 
-  @method async verify_simple_program_proof(proof: SimpleProgram.Proof) {
-    proof.verify().assertTrue();
-    const output: Field = proof.value;
+  @method async verify_simple_program_proof(proof: SimpleProgramProof) {
+    proof.verify();
+    console.log("proof", proof)
+    const output: Field = proof.publicOutput;
     this.num.set(output);
   }
 }

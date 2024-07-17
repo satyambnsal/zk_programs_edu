@@ -9,9 +9,9 @@ import { SimpleProgram } from './SimpleProgram';
  * See https://docs.minaprotocol.com/zkapps for more info.
  */
 
-let proofsEnabled = false;
+let proofsEnabled = true;
 
-describe.skip('Add', () => {
+describe('Add', () => {
   let deployerAccount: Mina.TestPublicKey,
     deployerKey: PrivateKey,
     senderAccount: Mina.TestPublicKey,
@@ -21,7 +21,10 @@ describe.skip('Add', () => {
     zkApp: Add;
 
   beforeAll(async () => {
-    if (proofsEnabled) await Add.compile();
+    if (proofsEnabled) {
+      await SimpleProgram.compile()
+      await Add.compile()
+    };
   });
 
   beforeEach(async () => {
@@ -69,8 +72,8 @@ describe.skip('Add', () => {
   it('correctly verifies simple program proof', async () => {
     await localDeploy();
 
-    const {verificationKey} = await SimpleProgram.compile();
-    const proof = await SimpleProgram.run(Field(1));
+    // const {verificationKey} = await SimpleProgram.compile();
+    const proof = await SimpleProgram.run(Field(0));
     
     const txn = await Mina.transaction(senderAccount, async () => {
       await zkApp.verify_simple_program_proof(proof)
